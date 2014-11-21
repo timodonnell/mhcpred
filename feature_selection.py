@@ -186,7 +186,7 @@ def examine_features(f, feature_names):
         median = np.median(x)
         iqr = np.percentile(x, 75) - np.percentile(x, 25)
         std = np.std(x)
-        print "Feature %d/%d: %s (nnz=%d/%d, median=%s, iqr=%s, std=%s)" % (
+        print("Feature %d/%d: %s (nnz=%d/%d, median=%s, iqr=%s, std=%s)" % (
             i + 1,
             n_features,
             feature_name,
@@ -194,20 +194,20 @@ def examine_features(f, feature_names):
             len(x),
             median,
             iqr,
-            std)
+            std))
 
         if std < args.min_feature_variance:
-            print "-- No variance!"
+            print("-- No variance!")
             bad_cols.add(feature_name)
 
         n_nan = np.isnan(x).sum()
         if n_nan > 0:
-            print "-- # NaN: %d" % n_nan
+            print("-- # NaN: %d" % n_nan)
             bad_cols.add(feature_name)
 
         n_inf = np.isinf(x).sum()
         if n_inf > 0:
-            print "-- # inf: %d" % n_inf
+            print("-- # inf: %d" % n_inf)
             bad_cols.add(feature_name)
     return bad_cols
 
@@ -250,13 +250,13 @@ if __name__ == "__main__":
         f = h5py.File(args.input_file)
 
 
-    print "ARGUMENTS"
-    print args
+    print("ARGUMENTS")
+    print(args)
 
     if args.print_all_columns:
-        print "Columns in %s" % args.input_file
+        print("Columns in %s" % args.input_file)
         for k in f.iterkeys():
-            print "  ", k
+            print("  ", k)
 
     assert args.sample_fraction > 0, \
         "Argument --sample-fraction must be positive"
@@ -316,10 +316,10 @@ if __name__ == "__main__":
     if len(bad_cols) > 0:
         feature_names = [x for x in feature_names if x not in bad_cols]
         n_features = len(feature_names)
-        print "Bad columns: %s" % bad_cols
+        print("Bad columns: %s" % bad_cols)
 
-    print "Samples per iter: %d / %d" % (n_samples_per_iter, n_samples)
-    print "Features per iter: %d / %d" % (n_features_per_iter, n_features)
+    print("Samples per iter: %d / %d" % (n_samples_per_iter, n_samples))
+    print("Features per iter: %d / %d" % (n_features_per_iter, n_features))
 
      # these will get shuffled to create subsets
     all_sample_indices = np.arange(n_samples)
@@ -375,7 +375,7 @@ if __name__ == "__main__":
     else:
         n_iters = args.iters
 
-    for i in xrange(n_iters):
+    for i in range(n_iters):
         np.random.shuffle(all_feature_indices)
         np.random.shuffle(all_sample_indices)
         feature_indices = all_feature_indices[:n_features_per_iter]
@@ -402,12 +402,12 @@ if __name__ == "__main__":
         my = Y_test.mean()
         baseline_acc = max(my, 1.0 - my)
         baseline_auc = 0.5
-        print
-        print "============"
-        print "Iter #%d/%d" % (i+1, n_iters)
-        print "============"
-        print
-        print "-- Baseline accuracy for iter %0.4f" % baseline_acc
+        print()
+        print("============")
+        print("Iter #%d/%d" % (i+1, n_iters))
+        print("============")
+        print()
+        print("-- Baseline accuracy for iter %0.4f" % baseline_acc)
         X_train = []
         X_test = []
         for feature_idx in feature_indices:
@@ -427,14 +427,14 @@ if __name__ == "__main__":
         std_zero_indices = np.nonzero(std_zero_mask)[0]
         # drop features with identical values across the sample
         if len(std_zero_indices) > 0:
-            print "-- Dropping %d zero variance features: %s" % (
+            print("-- Dropping %d zero variance features: %s" % (
                 len(std_zero_indices),
                 [feature_names[global_idx]
                  for global_idx in
                    [feature_indices[local_idx]
                     for local_idx in std_zero_indices]
                 ]
-            )
+            ))
             std_nonzero_mask = ~std_zero_mask
             X_train = X_train[:, std_nonzero_mask]
             X_test = X_test[:, std_nonzero_mask]
@@ -467,13 +467,13 @@ if __name__ == "__main__":
         best_accuracy = 0
         best_auc = 0
 
-        print "-- train shape = %s, test shape = %s)" % (
+        print("-- train shape = %s, test shape = %s)" % (
             X_train.shape,
             X_test.shape,
-        )
+        ))
         for model in models:
-            print
-            print " *", model
+            print()
+            print(" *", model)
             # for models that don't take a class balancing parameter
             # we have to manually reweight the samples by their inverse class
             # frequency
@@ -487,8 +487,8 @@ if __name__ == "__main__":
                     mask = Y_train == class_value
                     count = mask.sum()
                     weight = len(Y_train) / float(count)
-                    print " -- sample weight for %d = %0.4f" % (
-                        class_value, weight)
+                    print(" -- sample weight for %d = %0.4f" % (
+                        class_value, weight))
                     sample_weights[mask] = weight
                 model.fit(X_train, Y_train, sample_weight = sample_weights)
             else:
@@ -507,7 +507,7 @@ if __name__ == "__main__":
                 prob = model.predict_proba(X_test)[:,-1]
 
             auc = roc_auc_score(Y_test, prob)
-            print "  Accuracy=%0.4f, AUC=%0.4f" % (accuracy, auc)
+            print("  Accuracy=%0.4f, AUC=%0.4f" % (accuracy, auc))
             if auc > best_auc:
                 best_model = model
                 best_accuracy = accuracy
@@ -523,24 +523,23 @@ if __name__ == "__main__":
         nnz_coeff = nz_coeff_mask.sum()
         prct_nz_coeff = nz_coeff_mask.mean()
         abs_coeff[~nz_coeff_mask] = 0
-        print "-- %% nonzero coeffs %0.4f (min=%s, max=%s, median=%s)" % (
+        print("-- %% nonzero coeffs %0.4f (min=%s, max=%s, median=%s)" % (
             prct_nz_coeff,
             np.min(coeff),
             np.max(coeff),
             np.median(coeff)
-        )
+        ))
         if prct_nz_coeff == 0:
-            print "Skipping iteration %d due to all zero features" % (i+1)
+            print("Skipping iteration %d due to all zero features" % (i+1))
             continue
         if best_auc < 0.5:
-            print "Skipping iteration #%d due to low AUC: %0.4f" % (
-                i+1, best_auc
-            )
+            print("Skipping iteration #%d due to low AUC: %0.4f" % (
+                i+1, best_auc))
             continue
 
         # value of a predictor is how much better than baseline it did
         diff = (best_auc - 0.5)
-        print "-- Improvement over baseline: %0.4f" % diff
+        print("-- Improvement over baseline: %0.4f" % diff)
         value = diff / baseline_auc
         total = abs_coeff.sum()
         fractions = abs_coeff / total
@@ -557,14 +556,14 @@ if __name__ == "__main__":
 
     n_zero_scores = sum(score == 0 for score in feature_scores.values())
 
-    print
-    print
-    print "============================"
-    print "# features with score = 0: %d/%d" % (
-        n_zero_scores, len(feature_scores))
-    print
+    print()
+    print()
+    print("============================")
+    print("# features with score = 0: %d/%d" % (
+        n_zero_scores, len(feature_scores)))
+    print()
     for name, score in feature_scores.most_common()[::-1]:
-        print name, score, "(n=%d)" % feature_counts[name]
+        print(name, score, "(n=%d)" % feature_counts[name])
 
     n_nonzero_scores =  len(feature_scores) - n_zero_scores
     assert n_nonzero_scores > 0, "All features had zero importance!"
@@ -580,12 +579,13 @@ if __name__ == "__main__":
             col = f[name][:]
             keep_cols.append(col)
             keep_names.append(name)
-    print "---"
-    print "# useful features: %d / %d" % (len(keep_cols), n_features)
+    print("---")
+    print("# useful features: %d / %d" % (len(keep_cols), n_features))
 
     X_kept = np.array(keep_cols).T
-    print "Final X.shape", X_kept.shape
+    print("Final X.shape", X_kept.shape)
     output_dictionary = {"X": X_kept, "y":y, "features" : keep_names}
     for attr_name in sample_attribute_names:
         output_dictionary[attr_name] = f[attr_name][:]
     np.savez(args.output_data_file, **output_dictionary)
+
